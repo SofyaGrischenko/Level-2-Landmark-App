@@ -1,11 +1,9 @@
 <template>
   <div>
-
+    <input type="text" />
+    <input type="text" />
+    <input type="password" />
   </div>
 </template>
 
-<script>
-  export default{
-    
-  }
-</script>
+<script setup lang="ts"></script>
