@@ -6,4 +6,14 @@ const router = createRouter({
   routes: routes,
 })
 
+router.beforeEach(async (to, from, next) => {
+  const uid = localStorage.getItem('uid')
+
+  if (uid && !to.meta?.isAuth) {
+    next(to?.name === 'invalid' ? '' : '/')
+  } else if (!uid && to.meta?.isAuth) {
+    next('/login')
+  } else next()
+})
+
 export default router
