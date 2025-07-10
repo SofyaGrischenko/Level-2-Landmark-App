@@ -11,6 +11,6 @@ export interface Input {
   validations: Validation[]
 }
 
-export type Form<T extends Input[]> = {
-  [K in T[number]['field']]: string
+export type Form = {
+  [K in Input['field']]: string
 }

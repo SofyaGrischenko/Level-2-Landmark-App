@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrap">
-    <dynamic-form :inputs="inputs" @submit="submitForm" :title="'Sign up'" class="form">
+    <dynamic-form :inputs="inputs" :title="'Sign up'" class="form" @submit="submitForm">
       <template v-slot:errors v-if="serviceError">
         <p>{{ serviceError }}</p>
       </template>
@@ -13,11 +13,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
-import { registration } from '@/services/api/auth'
+import { useUserStore } from '@/stores'
+import router from '@/router/index'
 import { required, minLength, isEmail, isSame } from '@/utils/validations'
 import type { Form, Input } from '@/types/form.types'
 
 const serviceError = ref(null)
+const userStore = useUserStore()
 
 const inputs = ref<Input[]>([
   {
@@ -67,23 +69,24 @@ const inputs = ref<Input[]>([
         errorMessage: 'Comfirm password must be at least 6 characters',
       },
       {
-        rule: (val: string): boolean => isSame(val, password.value),
+        rule: (val: string): boolean => isSame(val, password.value.value),
         errorMessage: 'Passwords are not the same',
       },
     ],
   },
 ])
-const password = ref('')
+const password = ref(inputs.value[1])
 
 const submitForm = async (formData: Form) => {
+  console.log('password', password)
   serviceError.value = null
   try {
     const { email, password } = formData
-    const user = await registration({ email, password })
-    localStorage.setItem('uid', user.uid)
+    console.log('registration', { email, password })
 
-    // this.$store.commit('setUser', user)
-    // this.$router.push('/')
+    await userStore.registration({ email, password })
+   
+    router.push('/')
   } catch (error) {
     if (typeof error === null) {
       serviceError.value = error as null

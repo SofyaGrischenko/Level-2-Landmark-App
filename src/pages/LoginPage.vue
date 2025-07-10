@@ -13,11 +13,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
-import { login } from '@/services/api/auth'
 import { required, isEmail, minLength } from '@/utils/validations'
+import { useUserStore } from '@/stores'
+import router from '@/router/index'
 import type { Input, Form } from '@/types/form.types'
 
 const serviceError = ref<string | null>(null)
+const userStore = useUserStore()
 
 const inputs = ref<Input[]>([
   {
@@ -58,12 +60,8 @@ const handleFormSubmit = async (formData: Form) => {
   serviceError.value = null
   try {
     const { email, password } = formData
-    const user = await login({ email, password })
-    localStorage.setItem('uid', user.uid)
-    console.log(user)
-
-    // this.$store.commit('setUser', user)
-    // this.$router.push('/')
+    await userStore.login({ email, password })
+    router.push('/')
   } catch (error) {
     serviceError.value = error as string
     console.error(error)

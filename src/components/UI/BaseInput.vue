@@ -1,24 +1,24 @@
 <template>
   <div class="input-wrap">
     <input
-      :type="props.type"
-      :placeholder="props.placeholder"
-      :name="props.name"
-      :value="props.modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      v-model="modelValue"
+      :type="type"
+      :placeholder="placeholder"
+      :name="name"
       class="input"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-//todo: fix props
-const props = defineProps({
-  type: String,
-  placeholder: String,
-  name: String,
-  modelValue: String,
-})
+
+const modelValue = defineModel<string>()
+
+defineProps<{
+  type: string
+  placeholder: string
+  name: string
+}>()
 
 defineEmits(['update:modelValue'])
 </script>
@@ -56,6 +56,6 @@ input:hover {
   outline: none;
   border-color: var(--button-color);
   background-color: #fff;
-  box-shadow: 0 0 3px 3px rgba(28, 165, 37, 0.467)
+  box-shadow: 0 0 3px 3px rgba(28, 165, 37, 0.467);
 }
 </style>
