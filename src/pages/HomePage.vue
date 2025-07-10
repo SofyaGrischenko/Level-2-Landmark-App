@@ -1,7 +1,7 @@
 <template>
-  <div>MAP</div>
+  <div></div>
 </template>
 
 <script setup lang="ts">
- 
+
 </script>

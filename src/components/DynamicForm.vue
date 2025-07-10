@@ -24,9 +24,9 @@ const { inputs } = defineProps<{
   title: string
 }>()
 
-const emit = defineEmits<{ submit: [value: Form<Input[]>] }>()
+const emit = defineEmits<{ submit: [value: Form] }>()
 
-const formData = ref<Form<Input[]>>({})
+const formData = ref<Form>({})
 
 const handleSubmit = () => {
   emit('submit', formData.value)

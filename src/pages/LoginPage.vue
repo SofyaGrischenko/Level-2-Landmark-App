@@ -1,32 +1,82 @@
 <template>
   <div class="page-wrap">
-    <DynamicForm :inputs="inputs" class="form" :title="'Sign In'" @submit="handleFormSubmit" />
+    <dynamic-form :inputs="inputs" :title="'Sign In'" class="form" @submit="handleFormSubmit">
+      <template v-slot:errors v-if="serviceError">
+        <p>{{ serviceError }}</p>
+      </template>
+    </dynamic-form>
+    <span>New to this app?</span>
+    <router-link to="/registration">sign up</router-link>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
-import { registration } from '@/services/api/auth'
+import { login } from '@/services/api/auth'
+import { required, isEmail, minLength } from '@/utils/validations'
 import type { Input, Form } from '@/types/form.types'
-import type { User } from '@/types/user.types'
 
-const inputs: Input[] = [
+const serviceError = ref<string | null>(null)
+
+const inputs = ref<Input[]>([
   {
     type: 'email',
     placeholder: 'Email',
-    name: 'email',
+    field: 'email',
+    value: '',
+    validations: [
+      {
+        rule: (val: string): boolean => required(val),
+        errorMessage: 'Email is required',
+      },
+      {
+        rule: (val: string) => isEmail(val),
+        errorMessage: 'Please enter a valid email address',
+      },
+    ],
   },
   {
     type: 'password',
     placeholder: 'Password',
-    name: 'password',
+    field: 'password',
+    value: '',
+    validations: [
+      {
+        rule: (val: string) => required(val),
+        errorMessage: 'Password is required',
+      },
+      {
+        rule: (val: string) => minLength(val),
+        errorMessage: 'Password must be at least 6 characters',
+      },
+    ],
   },
-]
+])
 
-const handleFormSubmit = (formData: Form<Input[]>) => {
-  registration(formData as unknown as User)
-  console.log('Form data:', formData)
+const handleFormSubmit = async (formData: Form) => {
+  serviceError.value = null
+  try {
+    const { email, password } = formData
+    const user = await login({ email, password })
+    localStorage.setItem('uid', user.uid)
+    console.log(user)
+
+    // this.$store.commit('setUser', user)
+    // this.$router.push('/')
+  } catch (error) {
+    serviceError.value = error as string
+    console.error(error)
+  }
 }
+
+watch(
+  inputs,
+  () => {
+    serviceError.value = null
+  },
+  { deep: true },
+)
 </script>
 
 <style scoped>
@@ -37,5 +87,6 @@ const handleFormSubmit = (formData: Form<Input[]>) => {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 </style>
