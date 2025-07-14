@@ -8,9 +8,9 @@ import type { Sight } from '@/types/sight.types'
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
 
-  const setUser = (userDate: User) => {
-    user.value = userDate
-    localStorage.setItem('uid', userDate.uid)
+  const setUser = (userData: User) => {
+    user.value = userData
+    localStorage.setItem('uid', userData.uid)
   }
 
   const clearUser = () => {

@@ -7,5 +7,6 @@ export interface Sight {
   userId: string
   createdAt: Timestamp
   rating: number
+  latlng: [number, number]
   img: string[]
 }
