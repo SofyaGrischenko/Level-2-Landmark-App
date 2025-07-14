@@ -11,6 +11,8 @@ import BaseButton from './UI/BaseButton.vue'
 import { useUserStore } from '@/stores/index'
 import router from '@/router'
 
+
+
 const userStore = useUserStore()
 
 const logout = () => {
@@ -20,7 +22,7 @@ const logout = () => {
 }
 
 const newSight = () => {
-  router.push('/sightEditor')
+   router.push('/sight/editor')
 }
 </script>
 
@@ -29,23 +31,47 @@ const newSight = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 1rem 2rem;
   background-color: var(--background-color);
   width: 100%;
-  box-shadow: 2px 2px 10px #919191;
+  box-shadow: 2px 2px 10px rgba(145, 145, 145, 0.3);
   position: fixed;
   top: 0;
   z-index: 1000;
+  box-sizing: border-box;
 }
 
 .base-button {
-  min-width: 150px;
+  min-width: 120px;
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
 }
 
 .logo {
   color: var(--text-color);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 10px;
+  letter-spacing: 0.5rem;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .logo {
+    font-size: 1rem;
+    letter-spacing: 0.3rem;
+  }
+
+  .base-button {
+    font-size: 1rem;
+    min-width: unset;
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>

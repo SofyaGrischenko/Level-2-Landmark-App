@@ -13,6 +13,5 @@ const sightStore = useSightsStore()
 
 onMounted(() => {
   sightStore.getAllSights()
-
 })
 </script>
