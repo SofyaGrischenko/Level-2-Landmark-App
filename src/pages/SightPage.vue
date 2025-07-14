@@ -1,4 +1,5 @@
 <template>
+  <app-header/>
   <div class="page-wrap">
     <div class="sight-map">
       <app-map class="map" />
@@ -28,8 +29,8 @@
 </template>
 
 <script setup lang="ts">
-// import { ref } from 'vue'
 import AppMap from '@/components/UI/AppMap.vue'
+import AppHeader from '@/components/AppHeader.vue'
 import BaseButton from '@/components/UI/BaseButton.vue'
 </script>
 

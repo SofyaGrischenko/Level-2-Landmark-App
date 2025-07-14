@@ -32,7 +32,7 @@ export const routes = [
     },
   },
   {
-    path: '/sightEditor',
+    path: '/sight/editor',
     name: 'sight-editor',
     component: () => import('@/pages/SightEditor.vue'),
     meta: {
