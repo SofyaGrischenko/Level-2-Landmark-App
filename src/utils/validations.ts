@@ -15,9 +15,5 @@ export const isEmail = (value: string): boolean => {
 }
 
 export const isSame = (first: string, second: string): boolean => {
-  console.log(first)
-  console.log('pas', second);
-  
-
   return first === second
 }
