@@ -31,12 +31,13 @@ const { inputs } = defineProps<{
 }>()
 
 const emit = defineEmits<{ submit: [value: Form] }>()
-const currentErrors = ref<string[]>([])
+
 const slots = useSlots()
+
+const currentErrors = ref<string[]>([])
 
 const handleSubmit = () => {
   currentErrors.value = []
-  console.log('submit')
 
   const formData = inputs.reduce((acc, input) => {
     if (input?.validations?.length) {
@@ -50,17 +51,14 @@ const handleSubmit = () => {
     return acc
   }, {} as Form)
 
-  if (currentErrors.value.length) {
-    return
+  if (!currentErrors.value.length) {
+    emit('submit', formData)
   }
-  emit('submit', formData)
 }
 
 watch(
   () => inputs,
-  () => {
-    currentErrors.value = []
-  },
+  () => (currentErrors.value = []),
   { deep: true },
 )
 </script>
@@ -103,4 +101,8 @@ watch(
   align-items: center;
   text-align: center;
 }
+
+/* .sight-form{
+
+} */
 </style>

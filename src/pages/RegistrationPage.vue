@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrap">
-    <dynamic-form :inputs="inputs" :title="'Sign up'" class="form" @submit="submitForm">
+    <dynamic-form :inputs="inputs" :title="'Sign up'" class="form" @submit="handleFormSubmit">
       <template v-slot:errors v-if="serviceError">
         <p>{{ serviceError }}</p>
       </template>
@@ -77,15 +77,11 @@ const inputs = ref<Input[]>([
 ])
 const password = ref(inputs.value[1])
 
-const submitForm = async (formData: Form) => {
-  console.log('password', password)
+const handleFormSubmit = async (formData: Form) => {
   serviceError.value = null
   try {
     const { email, password } = formData
-    console.log('registration', { email, password })
-
     await userStore.registration({ email, password })
-   
     router.push('/')
   } catch (error) {
     if (typeof error === null) {
