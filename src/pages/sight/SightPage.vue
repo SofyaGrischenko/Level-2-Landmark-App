@@ -1,20 +1,14 @@
 <template>
-  <app-header/>
+  <app-header />
   <div class="page-wrap">
     <div class="sight-map">
       <app-map class="map" />
     </div>
 
     <div class="sight-content">
-      <!-- <div class="sight-photos">
-        <img 
-          src="https://static.posters.cz/image/750webp/101995.webp"
-        />
-          <img 
-          src="https://static.posters.cz/image/750webp/101995.webp"
-        />
-
-      </div> -->
+      <div class="sight-photos">
+        <img src="" />
+      </div>
       <h2>sguisrgh rguhsg ush g</h2>
       <p class="sight-description">
         Why do we use it? It is a long established fact that a reader will be distracted by the
@@ -70,6 +64,10 @@ h2 {
 .sight-map {
   width: 100vw;
   height: 100vh;
+  padding-top: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .sight-rating {
@@ -81,5 +79,12 @@ h2 {
 :deep(.leaflet-container) {
   width: 80%;
   height: 80%;
+}
+
+@media (max-width: 768px) {
+  .page-wrap {
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 </style>

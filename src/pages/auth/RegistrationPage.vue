@@ -13,9 +13,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
+import { required, minLength, isEmail, isSame } from '@/utils/validations'
 import { useUserStore } from '@/stores'
 import router from '@/router/index'
-import { required, minLength, isEmail, isSame } from '@/utils/validations'
 import type { Form, Input } from '@/types/form.types'
 
 const serviceError = ref(null)
