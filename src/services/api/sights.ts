@@ -25,8 +25,6 @@ export const handleGetSights = async () => {
 }
 
 export const handleCreateSight = async (sight: SightPayload) => {
-  console.log('api', sight)
-
   try {
     await addDoc(collection(db, 'sights'), {
       title: sight.title,

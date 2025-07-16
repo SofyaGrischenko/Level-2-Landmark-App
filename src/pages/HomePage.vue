@@ -11,6 +11,8 @@ import { useSightsStore } from '@/stores/sights'
 const sightStore = useSightsStore()
 
 sightStore.getAllSights()
+sightStore.clearCurrentSight()
+
 </script>
 
 <style scoped>

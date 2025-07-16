@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Timestamp } from 'firebase/firestore'
 import AppMap from '@/components/UI/AppMap.vue'
@@ -109,7 +109,6 @@ const handleMapClick = (coords: LatLng) => {
 }
 
 onMounted(() => setupForm())
-onUnmounted(() => sightStore.clearCurrentSight())
 </script>
 
 <style scoped>
