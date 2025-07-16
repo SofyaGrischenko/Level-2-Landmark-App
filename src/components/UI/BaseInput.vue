@@ -1,26 +1,17 @@
 <template>
   <div class="input-wrap">
-    <input
-      v-model="modelValue"
-      :type="type"
-      :placeholder="placeholder"
-      :name="name"
-      class="input"
-    />
+    <input v-model="model" :type :placeholder :name class="input" />
   </div>
 </template>
 
 <script setup lang="ts">
-
-const modelValue = defineModel<string>()
+const model = defineModel<string>()
 
 defineProps<{
   type: string
   placeholder: string
   name: string
 }>()
-
-defineEmits(['update:modelValue'])
 </script>
 
 <style scoped>

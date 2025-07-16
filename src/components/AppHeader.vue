@@ -1,28 +1,38 @@
 <template>
   <div class="header">
     <h2 class="logo">Landmark</h2>
-    <base-button @click="newSight">new sight</base-button>
+    <div class="center-action">
+      <base-button v-if="$route.name === 'home'" @click="newSight"> New Sight </base-button>
+      <base-button
+        v-else-if="$route.name === 'sight-editor' || $route.name === 'sight'"
+        @click="goBack"
+      >
+        Go back
+      </base-button>
+    </div>
     <base-button @click="logout">Log Out</base-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import BaseButton from './UI/BaseButton.vue'
-import { useUserStore } from '@/stores/index'
+import { useUserStore } from '@/stores/user'
 import router from '@/router'
-
-
 
 const userStore = useUserStore()
 
 const logout = () => {
   userStore.storeLogout()
   localStorage.removeItem('uid')
-  router.push('/login')
+  router.push({ name: 'login' })
 }
 
 const newSight = () => {
-   router.push('/sight/editor')
+  router.push({ name: 'sight-editor', params: { id: 'new' } })
+}
+
+const goBack = () => {
+  router.back()
 }
 </script>
 

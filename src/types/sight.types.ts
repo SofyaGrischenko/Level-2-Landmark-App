@@ -1,12 +1,18 @@
 import type { Timestamp } from 'firebase/firestore'
 
-export interface Sight {
-  id: string
+export interface SightPayload {
   title: string
   description: string
   userId: string
   createdAt: Timestamp
-  rating: number
-  latlng: [number, number]
-  img: string[]
+  rating: string
+  latlng: {
+    lat: number
+    lng: number
+  }
+  img: string
+}
+
+export interface Sight extends SightPayload {
+  id: string
 }

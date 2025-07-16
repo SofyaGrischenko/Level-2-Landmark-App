@@ -3,86 +3,123 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import L, { Map as LeafletMap } from 'leaflet'
-import { useSightsStore } from '@/stores'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import L, { LatLng, Map as LeafletMap } from 'leaflet'
+import { createPopup, yellowIcon, greenIcon } from '@/utils/map'
+import { useSightsStore } from '@/stores/sights'
+import { useUserStore } from '@/stores/user'
+import type { Sight } from '@/types/sight.types'
 import 'leaflet/dist/leaflet.css'
 
+const { isInteractive, isSightPage } = defineProps<{
+  isInteractive?: boolean
+  isSightPage?: boolean
+}>()
+
+const emit = defineEmits<{ (e: 'map-click', payload: LatLng): void }>()
+
+const router = useRouter()
+
 const sightStore = useSightsStore()
-const currentUserId = localStorage.getItem('uid')
+const userStore = useUserStore()
+
+const markerLayer = L.layerGroup()
+let tempMarker: L.Marker | null = null
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 const map = ref<L.Map | null>(null)
-const markerLayer = L.layerGroup()
+const currentUserId = computed(() => userStore.user?.uid)
 
-const greenIcon = new L.Icon({
-  iconUrl:
-    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-})
-
-const yellowIcon = new L.Icon({
-  iconUrl:
-    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-})
-
-watch(
-  () => sightStore.sights,
-  (newMarkers) => {
-    markerLayer.clearLayers()
-
-    newMarkers?.forEach((marker) => {
-      const popupContent = `
-      <div class="popup-header">
-        <h3 class=popup-title>${marker.title}</h3>
-      </div>
-      <div class="popup-body">
-        <img src="${marker.img[0]}" alt="${marker.description}" class="popup-photo"/>
-        <p class="popup-rating">⭐${marker.rating}</p>
-      </div>
-      `
-
-      L.marker(marker.latlng, { icon: marker.userId == currentUserId ? greenIcon : yellowIcon })
-        .addTo(map.value as LeafletMap)
-        .bindPopup(popupContent, { className: 'popup' })
-    })
-  },
-  { deep: true, immediate: true },
-)
-
-onMounted(() => {
+const initMap = () => {
   if (mapContainer.value) {
     map.value = L.map(mapContainer.value).setView([53.902284, 27.561831], 10)
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map.value as LeafletMap)
 
     markerLayer.addTo(map.value as LeafletMap)
+
+    if (isInteractive) enableMapInteractions()
+
+    if (isSightPage) {
+      displaySingleSight()
+    }
   }
-})
+}
+
+const displaySingleSight = () => {
+  const currentSight = sightStore.currentSight
+  if (!map.value || !currentSight) return
+
+  markerLayer.clearLayers()
+
+  const marker = newMarker(currentSight)
+  marker.addTo(map.value as LeafletMap)
+
+  map.value.setView(currentSight.latlng, 15)
+}
+
+const enableMapInteractions = () => {
+  map.value?.on('click', (e) => {
+    const coords = e.latlng
+    if (tempMarker) {
+      tempMarker.setLatLng(coords)
+    } else {
+      tempMarker = L.marker(coords).addTo(map.value as LeafletMap)
+    }
+    emit('map-click', coords)
+  })
+}
+
+const newMarker = (marker: Sight) => {
+  const markerInstance = L.marker(marker.latlng, {
+    icon: marker.userId == currentUserId.value ? greenIcon : yellowIcon,
+  })
+
+  markerInstance.bindPopup(createPopup(marker), { className: 'popup' }).on('popupopen', () => {
+    const popupEl = markerInstance.getPopup()?.getElement()
+    popupEl?.addEventListener('click', () => {
+      handleMarkerClick(marker)
+    })
+  })
+
+  return markerInstance
+}
+
+const handleMarkerClick = (sight: Sight) => {
+  sightStore.setCurrentSight(sight)
+  router.push({ name: 'sight', params: { id: sight.id } })
+}
+
+const displayMarkers = (newMarkers: Sight[]) => {
+  if (!map.value || !newMarkers) return
+
+  markerLayer.clearLayers()
+
+  newMarkers?.forEach((marker) => {
+    newMarker(marker).addTo(map.value as LeafletMap)
+  })
+}
+
+watch(
+  [() => sightStore.sights, () => userStore.user],
+  () => {
+    displayMarkers(sightStore.sights as Sight[])
+  },
+  { deep: true },
+)
+
+onMounted(() => initMap())
 </script>
 
 <style scoped>
-.map-container {
-  width: 100%;
-  height: 93vh;
-  top: 7vh;
-}
-
 :deep(.popup .leaflet-popup-content-wrapper) {
   max-width: 250px;
   background: var(--background-color);
   border-radius: 10px;
   box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
   padding: 0;
+  cursor: pointer;
 }
 
 :deep(.popup .leaflet-popup-content) {

@@ -7,7 +7,7 @@
         <slot name="errors" />
       </p>
     </div>
-    <div class="form__inputs">
+    <div class="form__inputs" >
       <template v-for="(input, index) in inputs" :key="index">
         <base-input
           v-if="input.type !== 'textarea' && input.type !== 'file'"
@@ -16,6 +16,7 @@
           :placeholder="input.placeholder"
           :name="input.field"
         />
+
         <textarea
           v-else-if="input.type === 'textarea'"
           v-model="input.value"
@@ -23,14 +24,9 @@
           :placeholder="input.placeholder"
           :name="input.field"
           class="input"
-        ></textarea>
-
-        <img-input
-          v-else-if="input.type === 'file'"
-          v-model="input.value"
-          :type="input.type"
-          :name="input.field"
         />
+
+        <img-input v-else-if="input.type === 'file'" v-model="input.value" :name="input.field" />
       </template>
     </div>
     <base-button @click.prevent="handleSubmit">submit</base-button>
@@ -86,12 +82,15 @@ watch(
 .form {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 10px;
   min-width: 300px;
 }
 
 .form__inputs {
   width: 35vw;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .form__title {

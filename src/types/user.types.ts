@@ -1,12 +1,12 @@
 import type { Timestamp } from 'firebase/firestore'
 
-export interface UserPivot {
+export interface UserPayload {
   email: string
   password: string
 }
 
-export type User = Omit<UserPivot, 'password'> & {
+export type User = Omit<UserPayload, 'password'> & {
   uid: string
   createdAt: Timestamp
-  isAdmin?: boolean
+  type: string
 }

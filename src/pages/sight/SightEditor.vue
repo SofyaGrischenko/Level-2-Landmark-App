@@ -1,92 +1,115 @@
 <template>
   <div class="page-wrap">
     <app-header />
-    <app-map is-interactive class="map" @map-click="handleMapClick" />
-    <dynamic-form :inputs="inputs" title="Sight" class="form task-form" @submit="handleSubmit" />
+    <app-map is-interactive is-sight-page class="map" @map-click="handleMapClick" />
+    <dynamic-form :inputs title="Sight" class="form task-form" @submit="handleSubmit" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { Timestamp } from 'firebase/firestore'
 import AppMap from '@/components/UI/AppMap.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import DynamicForm from '@/components/DynamicForm.vue'
-import { useSightsStore, useUserStore } from '@/stores'
+import { useSightsStore } from '@/stores/sights'
+import { useUserStore } from '@/stores/user'
 import { maxLength, required } from '@/utils/validations'
 import type { LatLng } from 'leaflet'
-import type { SightPayload } from '@/types/sight.types'
+import type { Sight, SightPayload } from '@/types/sight.types'
 import type { Form, Input } from '@/types/form.types'
 
 const sightStore = useSightsStore()
 const userStore = useUserStore()
+
+const router = useRouter()
+
+const currentUserUid = computed(() => userStore.user?.uid)
+const currentSight = computed(() => sightStore.currentSight)
+
 const newCoords = ref<LatLng>()
+const inputs = ref<Input[]>([])
 
-const currentUser = userStore.user?.uid
+const setupForm = () => {
+  inputs.value = [
+    {
+      type: 'text',
+      placeholder: 'Title',
+      field: 'title',
+      value: currentSight.value?.title || '',
+      validations: [
+        {
+          rule: (val: string): boolean => required(val),
+          errorMessage: 'Title is required',
+        },
+        {
+          rule: (val: string): boolean => maxLength(val),
+          errorMessage: 'Title is too long',
+        },
+      ],
+    },
+    {
+      type: 'textarea',
+      placeholder: 'Description...',
+      field: 'description',
+      value: currentSight.value?.description || '',
+    },
+    {
+      type: 'file',
+      placeholder: 'Your photo',
+      field: 'img',
+      value: currentSight.value?.img || '',
+    },
 
-const inputs = ref<Input[]>([
-  {
-    type: 'text',
-    placeholder: 'Title',
-    field: 'title',
-    value: '',
-    validations: [
-      {
-        rule: (val: string): boolean => required(val),
-        errorMessage: 'Title is required',
-      },
-      {
-        rule: (val: string): boolean => maxLength(val),
-        errorMessage: 'Title is too long',
-      },
-    ],
-  },
-
-  {
-    type: 'textarea',
-    placeholder: 'Description...',
-    field: 'description',
-    value: '',
-  },
-  {
-    type: 'file',
-    placeholder: 'Your photo',
-    field: 'img',
-    value: '',
-  },
-
-  {
-    type: 'number',
-    placeholder: 'Rating',
-    field: 'rating',
-    value: '',
-  },
-])
+    {
+      type: 'number',
+      placeholder: 'Rating',
+      field: 'rating',
+      value: currentSight.value?.rating || '',
+    },
+  ]
+}
 
 const handleSubmit = (formData: Form) => {
-  if (currentUser && newCoords.value) {
-    const newSight: SightPayload = {
+  if (newCoords.value && currentUserUid.value) {
+    const payload = {
       title: formData.title,
       description: formData.description,
-      userId: currentUser,
-      createdAt: Timestamp.now(),
       rating: formData.rating,
-      latlng: {
-        lat: newCoords.value.lat,
-        lng: newCoords.value.lng,
-      },
+      latlng: { lat: newCoords.value.lat, lng: newCoords.value.lng },
       img: formData.img,
     }
 
-    sightStore.createsight(newSight)
+    if (!currentSight.value?.id) {
+      const newSight: SightPayload = {
+        ...payload,
+        userId: currentUserUid.value,
+        createdAt: Timestamp.now(),
+      }
+      sightStore.createsight(newSight)
+      router.push('/')
+    } else {
+      const updatedData: Sight = {
+        ...payload,
+        id: currentSight.value.id,
+        userId: currentSight.value.userId,
+        createdAt: currentSight.value.createdAt,
+      }
+      sightStore.updateTask(updatedData)
+      router.push('/')
+    }
   } else {
-    throw new Error('Cannot create new sight')
+    console.error(`Cannot ${currentSight.value?.id ? 'update' : 'create'} sight`)
   }
 }
 
 const handleMapClick = (coords: LatLng) => {
   newCoords.value = coords
 }
+
+onMounted(() => setupForm())
+onUnmounted(() => sightStore.clearCurrentSight())
 </script>
 
 <style scoped>
@@ -98,6 +121,7 @@ const handleMapClick = (coords: LatLng) => {
   height: 100vh;
   width: 100vw;
   gap: 10vh;
+  background-color: var(--background-color);
 }
 
 .task-form {

@@ -2,30 +2,46 @@
   <app-header />
   <div class="page-wrap">
     <div class="sight-map">
-      <app-map class="map" />
+      <app-map class="map" is-sight-page />
     </div>
 
     <div class="sight-content">
       <div class="sight-photos">
-        <img src="" />
+        <img :src="sight?.img" />
       </div>
-      <h2>sguisrgh rguhsg ush g</h2>
+      <h2>{{ sight?.title }}</h2>
       <p class="sight-description">
-        Why do we use it? It is a long established fact that a reader will be distracted by the
-        readable content of a page when looking at its layout. The point of using Lorem Ipsum is
-        that it has a more-or-less normal distribution of letters, as opposed to using 'Content
-        here, content here'
+        {{ sight?.description }}
       </p>
-      <p class="sight-rating">⭐10</p>
-      <base-button>Edit</base-button>
+      <p class="sight-rating">⭐{{ sight?.rating }}</p>
+      <base-button v-if="sight?.userId === userStore.user?.uid" @click="handleEdit">
+        Edit
+      </base-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import AppMap from '@/components/UI/AppMap.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BaseButton from '@/components/UI/BaseButton.vue'
+import { useSightsStore } from '@/stores/sights'
+import { useUserStore } from '@/stores/user'
+
+const router = useRouter()
+
+const userStore = useUserStore()
+const sightStore = useSightsStore()
+
+const sight = computed(() => sightStore.currentSight)
+
+const handleEdit = () => {
+  if (sight.value) {
+    router.push({ name: 'sight-editor', params: { id: sight.value.id } })
+  }
+}
 </script>
 
 <style scoped>
@@ -74,6 +90,13 @@ h2 {
   font-size: 30px;
   font-weight: 700;
   color: var(--accent-color);
+}
+
+.sight-photos img {
+  width: 200px;
+  height: 200px;
+  border-radius: 20px;
+  object-fit: cover;
 }
 
 :deep(.leaflet-container) {

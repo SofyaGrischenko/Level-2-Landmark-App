@@ -1,27 +1,26 @@
 <template>
   <div
     class="image-input"
+    :class="{ 'drag-over': isDragging }"
     @dragover.prevent="onDragOver"
     @dragleave.prevent="onDragLeave"
     @drop.prevent="onDrop"
-    :class="{ 'drag-over': isDragging }"
   >
     <input
-      :type="type"
+      type="file"
       :name="name"
       ref="fileInput"
-      @change="onFileSelected"
       accept="image/*"
       class="file-input"
-      multiple
+      @change="onFileSelected"
     />
 
     <div v-if="!previewImage" class="drop-zone" @click="openFileDialog">
       <p>Drag&Drop photos here</p>
     </div>
     <div v-else class="preview-container">
-      <img :src="previewImage" alt="Image preview" class="preview-image" />
-      <button @click.stop="removeImage" class="remove-button">&times;</button>
+      <img :src="previewImage" alt="Image preview" class="preview-img" />
+      <button @click.stop="removeImage" class="remove-button">X</button>
     </div>
   </div>
 </template>
@@ -29,10 +28,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-defineProps<{
-  type: string
-  name: string
-}>()
+defineProps<{ name: string }>()
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -76,18 +72,16 @@ const handleFile = (file: File) => {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    previewImage.value = e.target?.result as string
+    const result = e.target?.result as string
+    previewImage.value = result
+    emit('update:modelValue', result)
   }
   reader.readAsDataURL(file)
-
-  emit('update:modelValue', file)
 }
 
 const removeImage = () => {
   previewImage.value = null
-  if (fileInput.value) {
-    fileInput.value.value = ''
-  }
+  if (fileInput.value) fileInput.value.value = ''
   emit('update:modelValue', null)
 }
 </script>
@@ -135,7 +129,7 @@ const removeImage = () => {
   position: relative;
 }
 
-.preview-image {
+.preview-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -145,16 +139,15 @@ const removeImage = () => {
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
+  background-color: #00000080;
+  color: #ffff;
   border: none;
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  font-size: 16px;
+  font-size: 1.2rem;
   line-height: 24px;
   text-align: center;
   cursor: pointer;
-  font-weight: bold;
 }
 </style>

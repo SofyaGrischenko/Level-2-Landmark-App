@@ -14,7 +14,7 @@
 import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
 import { required, isEmail, minLength } from '@/utils/validations'
-import { useUserStore } from '@/stores'
+import { useUserStore } from '@/stores/user'
 import router from '@/router/index'
 import type { Input, Form } from '@/types/form.types'
 

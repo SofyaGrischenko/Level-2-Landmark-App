@@ -1,3 +1,21 @@
+import { useSightsStore } from '@/stores/sights'
+import type { NavigationGuard } from 'vue-router'
+
+const beforeEnterGuard: NavigationGuard = async (to, from, next) => {
+  if (to.params.id === 'new') {
+    next()
+    return
+  }
+  const sightsStore = useSightsStore()
+  await sightsStore.getAllSights()
+
+  if (sightsStore.sights?.some((sight) => to.params.id === sight.id)) {
+    next()
+  } else {
+    next('/invalid')
+  }
+}
+
 export const routes = [
   {
     path: '/',
@@ -10,7 +28,7 @@ export const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/pages/LoginPage.vue'),
+    component: () => import('@/pages/auth/LoginPage.vue'),
     meta: {
       isAuth: false,
     },
@@ -18,7 +36,7 @@ export const routes = [
   {
     path: '/registration',
     name: 'registration',
-    component: () => import('@/pages/RegistrationPage.vue'),
+    component: () => import('@/pages/auth/RegistrationPage.vue'),
     meta: {
       isAuth: false,
     },
@@ -26,22 +44,28 @@ export const routes = [
   {
     path: '/sight/:id',
     name: 'sight',
-    component: () => import('@/pages/SightPage.vue'),
+    component: () => import('@/pages/sight/SightPage.vue'),
     meta: {
       isAuth: true,
     },
+    beforeEnter: beforeEnterGuard,
   },
   {
-    path: '/sight/editor',
+    path: '/sight/editor/:id',
     name: 'sight-editor',
-    component: () => import('@/pages/SightEditor.vue'),
+    component: () => import('@/pages/sight/SightEditor.vue'),
     meta: {
       isAuth: true,
     },
+    beforeEnter: beforeEnterGuard,
+  },
+  {
+    path: '/invalid',
+    name: 'invalid',
+    component: () => import('@/pages/NotFoundPage.vue'),
   },
   {
     path: '/:pathMatch(.*)*',
-    name: 'invalid',
-    component: () => import('@/pages/NotFoundPage.vue'),
+    redirect: { name: 'invalid' },
   },
 ]

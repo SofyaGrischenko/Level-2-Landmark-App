@@ -1,6 +1,6 @@
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
-import type { Sight } from '@/types/sight.types'
+import { addDoc, collection, doc, getDocs, updateDoc } from 'firebase/firestore'
+import { db } from '@/services/firebase'
+import type { Sight, SightPayload } from '@/types/sight.types'
 
 export const handleGetSights = async () => {
   const sights: Sight[] = []
@@ -22,4 +22,34 @@ export const handleGetSights = async () => {
   })
 
   return sights
+}
+
+export const handleCreateSight = async (sight: SightPayload) => {
+  console.log('api', sight)
+
+  try {
+    await addDoc(collection(db, 'sights'), {
+      title: sight.title,
+      description: sight.description,
+      userId: sight.userId,
+      createdAt: sight.createdAt,
+      rating: sight.rating,
+      latlng: sight.latlng,
+      img: sight.img,
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export const handleUpdateSight = async (updatedData: Sight) => {
+  const docRef = doc(db, 'sights', updatedData.id)
+
+  await updateDoc(docRef, {
+    title: updatedData.title,
+    description: updatedData.description,
+    rating: updatedData.rating,
+    latlng: updatedData.latlng,
+    img: updatedData.img,
+  })
 }

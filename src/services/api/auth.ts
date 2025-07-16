@@ -6,9 +6,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
-import type { User, UserPivot } from '@/types/user.types'
+import type { User, UserPayload } from '@/types/user.types'
 
-export const handleRegistration = async (user: UserPivot) => {
+export const handleRegistration = async (user: UserPayload) => {
   try {
     const userCredentials = await createUserWithEmailAndPassword(auth, user.email, user.password)
 
@@ -18,17 +18,18 @@ export const handleRegistration = async (user: UserPivot) => {
       uid: userCredentials.user.uid,
       email: user.email,
       createdAt: Timestamp.now(),
+      type: 'user',
     }
 
     await setDoc(userRef, userData)
 
     return userData
   } catch (e) {
-    throw new Error(e as string)
+    throw e
   }
 }
 
-export const handleLogin = async (user: UserPivot) => {
+export const handleLogin = async (user: UserPayload) => {
   try {
     const userCredentials = await signInWithEmailAndPassword(auth, user.email, user.password)
     const firebaseUser = userCredentials.user
@@ -40,12 +41,13 @@ export const handleLogin = async (user: UserPivot) => {
       throw new Error('User email is missing')
     }
     const userData = userDoc.data()
+    if (!userData) throw new Error('User data not found')
 
     return {
       uid: firebaseUser.uid,
       email: firebaseUser.email,
       createdAt: userData?.createdAt,
-      isAdmin: userData?.isAdmin ?? false,
+      type: userData?.type,
     }
   } catch (e) {
     const errorMessage = 'Login Error'
@@ -64,11 +66,34 @@ export const handleLogOut = async () => {
   }
 }
 
-export const handleGetMe = () => {
-  return new Promise((resolve) => {
-    const removeListener = onAuthStateChanged(auth, (user) => {
+export const handleGetMe = (): Promise<User> => {
+  return new Promise((resolve, reject) => {
+    const removeListener = onAuthStateChanged(auth, async (fbUser) => {
       removeListener()
-      resolve(user)
+
+      if (!fbUser) {
+        return reject(new Error('user is not authorized'))
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', fbUser?.uid))
+
+        if (!userDoc.exists()) {
+          return reject(new Error('User not found in firestore'))
+        }
+        const data = userDoc.data()
+
+        const user: User = {
+          uid: fbUser.uid,
+          email: fbUser.email ?? '',
+          createdAt: data.createdAt as Timestamp,
+          type: data.type,
+        }
+
+        resolve(user)
+      } catch (e) {
+        reject(e)
+      }
     })
   })
 }
