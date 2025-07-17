@@ -30,7 +30,9 @@ import { ref } from 'vue'
 
 defineProps<{ name: string }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const previewImage = ref<string | null>(null)
@@ -82,7 +84,7 @@ const handleFile = (file: File) => {
 const removeImage = () => {
   previewImage.value = null
   if (fileInput.value) fileInput.value.value = ''
-  emit('update:modelValue', null)
+  emit('update:modelValue', '')
 }
 </script>
 

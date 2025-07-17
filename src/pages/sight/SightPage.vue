@@ -22,26 +22,34 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppMap from '@/components/UI/AppMap.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import BaseButton from '@/components/UI/BaseButton.vue'
-import { useSightsStore } from '@/stores/sights'
 import { useUserStore } from '@/stores/user'
+import type { Sight } from '@/types/sight.types'
+import { handleGetSightById } from '@/services/api/sights'
+
+const { id } = defineProps<{ id: string }>()
 
 const router = useRouter()
 
 const userStore = useUserStore()
-const sightStore = useSightsStore()
 
-const sight = computed(() => sightStore.currentSight)
+const sight = ref<Sight | null>(null)
 
 const handleEdit = () => {
   if (sight.value) {
     router.push({ name: 'sight-editor', params: { id: sight.value.id } })
   }
 }
+
+const initSight = async () => {
+  if (id) sight.value = await handleGetSightById(id)
+}
+
+onMounted(() => initSight())
 </script>
 
 <style scoped>

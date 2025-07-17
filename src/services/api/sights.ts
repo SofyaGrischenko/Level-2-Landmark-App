@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDocs, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, getDocs, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase'
 import type { Sight, SightPayload } from '@/types/sight.types'
 
@@ -50,4 +50,12 @@ export const handleUpdateSight = async (updatedData: Sight) => {
     latlng: updatedData.latlng,
     img: updatedData.img,
   })
+}
+
+export const handleGetSightById = async (id: string) => {
+  const docRef = doc(db, 'sights', id)
+
+  const data = await getDoc(docRef)
+
+  return data.data() as Sight
 }
