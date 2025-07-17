@@ -9,10 +9,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const uid = localStorage.getItem('uid')
 
-  if (uid && !to.meta?.isAuth) {
-    next(to?.name === 'invalid' ? '' : '/')
-  } else if (!uid && to.meta?.isAuth) {
+  if (!uid && to.meta?.isAuth) {
     next('/login')
+  } else if (!to.meta.isAuth && uid && (to.path === '/login' || to.path === '/registration')) {
+    next('/')
   } else next()
 })
 

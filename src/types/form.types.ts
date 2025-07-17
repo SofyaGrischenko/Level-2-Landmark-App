@@ -8,7 +8,7 @@ export interface Input {
   placeholder: string
   field: string
   value: string
-  validations: Validation[]
+  validations?: Validation[]
 }
 
 export type Form = {

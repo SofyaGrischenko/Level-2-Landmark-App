@@ -1,6 +1,6 @@
 <template>
   <button class="base-button">
-    <slot class="button-text" />
+    <slot class="button-text"/>
   </button>
 </template>
 
@@ -11,9 +11,11 @@
   outline: none;
   cursor: pointer;
   font-size: 1.7rem;
+  font-weight: 500;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--text-color);
+  text-underline-offset: 5px;
 }
 
 .base-button:hover {

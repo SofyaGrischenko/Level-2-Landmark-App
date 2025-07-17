@@ -1,24 +1,24 @@
 <template>
   <div class="page-wrap">
-    <dynamic-form :inputs="inputs" :title="'Sign up'" class="form" @submit="submitForm">
+    <dynamic-form :inputs="inputs" :title="'Sign In'" class="form" @submit="handleFormSubmit">
       <template v-slot:errors v-if="serviceError">
         <p>{{ serviceError }}</p>
       </template>
     </dynamic-form>
-    <span>Already have an account?</span>
-    <router-link to="/login">sign in</router-link>
+    <span>New to this app?</span>
+    <router-link to="/registration">sign up</router-link>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import DynamicForm from '@/components/DynamicForm.vue'
-import { useUserStore } from '@/stores'
+import { required, isEmail, minLength } from '@/utils/validations'
+import { useUserStore } from '@/stores/user'
 import router from '@/router/index'
-import { required, minLength, isEmail, isSame } from '@/utils/validations'
-import type { Form, Input } from '@/types/form.types'
+import type { Input, Form } from '@/types/form.types'
 
-const serviceError = ref(null)
+const serviceError = ref<string | null>(null)
 const userStore = useUserStore()
 
 const inputs = ref<Input[]>([
@@ -29,7 +29,7 @@ const inputs = ref<Input[]>([
     value: '',
     validations: [
       {
-        rule: (val: string) => required(val),
+        rule: (val: string): boolean => required(val),
         errorMessage: 'Email is required',
       },
       {
@@ -54,43 +54,16 @@ const inputs = ref<Input[]>([
       },
     ],
   },
-  {
-    type: 'password',
-    placeholder: 'Confirm password',
-    field: 'passwordConfirm',
-    value: '',
-    validations: [
-      {
-        rule: (val: string) => required(val),
-        errorMessage: 'Comfirm password is required',
-      },
-      {
-        rule: (val: string) => minLength(val),
-        errorMessage: 'Comfirm password must be at least 6 characters',
-      },
-      {
-        rule: (val: string): boolean => isSame(val, password.value.value),
-        errorMessage: 'Passwords are not the same',
-      },
-    ],
-  },
 ])
-const password = ref(inputs.value[1])
 
-const submitForm = async (formData: Form) => {
-  console.log('password', password)
+const handleFormSubmit = async (formData: Form) => {
   serviceError.value = null
   try {
     const { email, password } = formData
-    console.log('registration', { email, password })
-
-    await userStore.registration({ email, password })
-   
+    await userStore.login({ email, password })
     router.push('/')
   } catch (error) {
-    if (typeof error === null) {
-      serviceError.value = error as null
-    }
+    serviceError.value = error as string
     console.error(error)
   }
 }
