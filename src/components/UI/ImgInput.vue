@@ -28,12 +28,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const previewImage = defineModel<string>()
+
 defineProps<{ name: string }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
-const previewImage = ref<string | null>(null)
 const isDragging = ref(false)
 
 const openFileDialog = () => {
@@ -80,9 +83,9 @@ const handleFile = (file: File) => {
 }
 
 const removeImage = () => {
-  previewImage.value = null
+  previewImage.value = ''
   if (fileInput.value) fileInput.value.value = ''
-  emit('update:modelValue', null)
+  emit('update:modelValue', '')
 }
 </script>
 

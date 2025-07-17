@@ -1,5 +1,6 @@
 import type { Sight } from '@/types/sight.types'
 import L from 'leaflet'
+import { calcRatingScore } from './rating'
 
 export const createPopup = (marker: Sight) => {
   return `
@@ -8,7 +9,7 @@ export const createPopup = (marker: Sight) => {
      </div>
      <div class="popup-body">
       <img src="${marker.img}" alt="${marker.description}" class="popup-photo"/>
-        <p class="popup-rating">⭐${marker.rating}</p>
+        <p class="popup-rating">⭐${calcRatingScore(marker.rating)}</p>
     </div>
        `
 }

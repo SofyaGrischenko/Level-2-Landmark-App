@@ -13,7 +13,14 @@
       <p class="sight-description">
         {{ sight?.description }}
       </p>
-      <p class="sight-rating">⭐{{ sight?.rating }}</p>
+      <div class="rating-display">
+        <p class="average-rating">Average rating {{ averageRating }}</p>
+
+        <div class="user-rating">
+          <app-rating v-if="userStore.user" v-model="userRating" />
+          <base-button v-if="showSubmitButton" @click="submitRating">OK</base-button>
+        </div>
+      </div>
       <base-button v-if="sight?.userId === userStore.user?.uid" @click="handleEdit">
         Edit
       </base-button>
@@ -22,26 +29,92 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppMap from '@/components/UI/AppMap.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import AppRating from '@/components/UI/AppRating.vue'
 import BaseButton from '@/components/UI/BaseButton.vue'
-import { useSightsStore } from '@/stores/sights'
 import { useUserStore } from '@/stores/user'
+import type { Rating, Sight } from '@/types/sight.types'
+import { handleGetSightById, handleUpdateSightProp } from '@/services/api/sights'
+import { calcRatingScore } from '@/utils/rating'
+
+const { id } = defineProps<{ id: string }>()
 
 const router = useRouter()
 
 const userStore = useUserStore()
-const sightStore = useSightsStore()
 
-const sight = computed(() => sightStore.currentSight)
+const sight = ref<Sight | null>(null)
+const userRating = ref<string>('0')
+
+let initialUserRatingValue = '0'
+
+const averageRating = computed(() => {
+  if (sight.value?.rating) {
+    return calcRatingScore(sight.value.rating)
+  }
+  return '0'
+})
+
+const showSubmitButton = computed(() => {
+  return userRating.value !== '0' && userRating.value !== initialUserRatingValue
+})
+
+const submitRating = async () => {
+  if (!sight.value || !userStore.user) return
+
+  if (!Array.isArray(sight.value?.rating)) {
+    return '0'
+  }
+
+  const newRatingValue = parseInt(userRating.value, 10)
+  const existingRatings = sight.value.rating || []
+  const userRatingIndex = existingRatings.findIndex((r) => {
+    return r.userId === userStore.user?.uid
+  })
+  let newRatingsArray: Rating[]
+
+  if (userRatingIndex !== -1) {
+    newRatingsArray = [...existingRatings]
+    newRatingsArray[userRatingIndex] = {
+      ...newRatingsArray[userRatingIndex],
+      value: newRatingValue,
+    }
+  } else {
+    newRatingsArray = [...existingRatings, { userId: userStore.user.uid, value: newRatingValue }]
+  }
+
+  initialUserRatingValue = userRating.value
+
+  await handleUpdateSightProp(id, newRatingsArray)
+
+  if (sight.value) {
+    sight.value.rating = newRatingsArray
+  }
+}
 
 const handleEdit = () => {
   if (sight.value) {
     router.push({ name: 'sight-editor', params: { id: sight.value.id } })
   }
 }
+
+const initSight = async () => {
+  if (id) sight.value = await handleGetSightById(id)
+
+  if (!sight.value || !Array.isArray(sight.value?.rating)) {
+    return '0'
+  }
+
+  if (sight.value?.rating && userStore.user) {
+    const ratingObj = sight.value.rating.find((r) => r.userId === userStore.user?.uid)
+    userRating.value = ratingObj ? ratingObj.value.toString() : '0'
+  }
+}
+
+onMounted(() => initSight())
 </script>
 
 <style scoped>
@@ -97,6 +170,16 @@ h2 {
   height: 200px;
   border-radius: 20px;
   object-fit: cover;
+}
+
+.average-rating {
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.user-rating {
+  display: flex;
+  gap: 5%;
 }
 
 :deep(.leaflet-container) {

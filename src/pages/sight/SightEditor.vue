@@ -2,7 +2,14 @@
   <div class="page-wrap">
     <app-header />
     <app-map is-interactive is-sight-page class="map" @map-click="handleMapClick" />
-    <dynamic-form :inputs title="Sight" class="form task-form" @submit="handleSubmit" />
+    <dynamic-form
+      is-sight-page
+      :inputs
+      :initial-rating="currentUserRating"
+      title="Sight"
+      class="form task-form"
+      @submit="handleSubmit"
+    />
   </div>
 </template>
 
@@ -17,7 +24,7 @@ import { useSightsStore } from '@/stores/sights'
 import { useUserStore } from '@/stores/user'
 import { maxLength, required } from '@/utils/validations'
 import type { LatLng } from 'leaflet'
-import type { Sight, SightPayload } from '@/types/sight.types'
+import type { Rating, Sight, SightPayload } from '@/types/sight.types'
 import type { Form, Input } from '@/types/form.types'
 
 const sightStore = useSightsStore()
@@ -31,7 +38,17 @@ const currentSight = computed(() => sightStore.currentSight)
 const newCoords = ref<LatLng>()
 const inputs = ref<Input[]>([])
 
-const setupForm = () => {
+const currentUserRating = computed(() => {
+  if (!currentSight.value || !Array.isArray(currentSight.value.rating)) {
+    return '0'
+  }
+
+  const userRating = currentSight.value.rating.find((r) => r.userId === currentUserUid.value)
+
+  return userRating ? userRating.value.toString() : '0'
+})
+
+const initForm = () => {
   inputs.value = [
     {
       type: 'text',
@@ -60,26 +77,48 @@ const setupForm = () => {
       placeholder: 'Your photo',
       field: 'img',
       value: currentSight.value?.img || '',
-    },
-
-    {
-      type: 'number',
-      placeholder: 'Rating',
-      field: 'rating',
-      value: currentSight.value?.rating || '',
+      validations: [
+        {
+          rule: (val: string): boolean => required(val),
+          errorMessage: 'Photo is required',
+        },
+      ],
     },
   ]
 }
 
 const handleSubmit = (formData: Form) => {
-  const updatedLat = newCoords.value?.lat || currentSight.value?.latlng.lat || 53
-  const updatedLng = newCoords.value?.lng || currentSight.value?.latlng.lng || 23
+  const updatedLat = currentSight.value?.latlng.lat || newCoords.value?.lat || 53
+  const updatedLng = currentSight.value?.latlng.lng || newCoords.value?.lng || 23
 
   if (currentUserUid.value) {
+    const newRatingValue = parseInt(formData.rating, 10)
+    const existingRatings: Rating[] = Array.isArray(currentSight.value?.rating)
+      ? currentSight.value.rating
+      : []
+    let updatedRatingsArray: Rating[] = []
+
+    const userRatingIndex = existingRatings.findIndex((r) => {
+      return r.userId === currentUserUid.value
+    })
+
+    if (userRatingIndex !== -1) {
+      updatedRatingsArray = [...existingRatings] as Rating[]
+      updatedRatingsArray[userRatingIndex] = {
+        userId: updatedRatingsArray[userRatingIndex].userId,
+        value: newRatingValue,
+      }
+    } else {
+      updatedRatingsArray = [
+        ...existingRatings,
+        { userId: currentUserUid.value, value: newRatingValue },
+      ] as Rating[]
+    }
+
     const payload = {
       title: formData.title,
       description: formData.description,
-      rating: formData.rating,
+      rating: updatedRatingsArray,
       img: formData.img,
       latlng: {
         lat: updatedLat,
@@ -114,7 +153,7 @@ const handleMapClick = (coords: LatLng) => {
   newCoords.value = coords
 }
 
-onMounted(() => setupForm())
+onMounted(() => initForm())
 </script>
 
 <style scoped>

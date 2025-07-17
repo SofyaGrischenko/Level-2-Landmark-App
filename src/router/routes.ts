@@ -48,6 +48,7 @@ export const routes = [
     meta: {
       isAuth: true,
     },
+    props: true,
     beforeEnter: beforeEnterGuard,
   },
   {
@@ -57,6 +58,7 @@ export const routes = [
     meta: {
       isAuth: true,
     },
+    props: true,
     beforeEnter: beforeEnterGuard,
   },
   {

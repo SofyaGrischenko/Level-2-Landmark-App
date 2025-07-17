@@ -5,7 +5,7 @@ export interface SightPayload {
   description: string
   userId: string
   createdAt: Timestamp
-  rating: string
+  rating: Rating[]
   latlng: {
     lat: number
     lng: number
@@ -15,4 +15,9 @@ export interface SightPayload {
 
 export interface Sight extends SightPayload {
   id: string
+}
+
+export interface Rating {
+  userId: string
+  value: number
 }
