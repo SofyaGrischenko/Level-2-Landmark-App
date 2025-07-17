@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrap">
-    <dynamic-form :inputs="inputs" :title="'Sign In'" class="form" @submit="handleFormSubmit">
+    <dynamic-form :inputs="inputs" :title="'Sign In'" :is-sight-page="false" class="form" @submit="handleFormSubmit">
       <template v-slot:errors v-if="serviceError">
         <p>{{ serviceError }}</p>
       </template>
