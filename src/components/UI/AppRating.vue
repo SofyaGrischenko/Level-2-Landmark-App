@@ -15,11 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-// import { handleGetSightRating, handleGetUserRating } from '@/services/api/rating';
+import { ref } from 'vue'
 
 const rating = defineModel<string>({ default: '0' })
-const { value, maxStar } = defineProps<{ value?: number; maxStar?: number }>()
+const { maxStar } = defineProps<{ value?: number; maxStar?: number }>()
 
 const emit = defineEmits<{
   (e: 'update:value', value: string): void
@@ -28,9 +27,6 @@ const emit = defineEmits<{
 const isHovered = ref<boolean>(false)
 const hoverValue = ref<number>(0)
 const max = ref<number>(maxStar ? maxStar : 5)
-
-// const sightRating = await handleGetSightRating()
-// const userRating = await handleGetUserRating()
 
 const hoverRating = (rate: number) => {
   isHovered.value = true
@@ -46,13 +42,6 @@ const resetHover = () => {
   isHovered.value = false
   hoverValue.value = 0
 }
-
-watch(
-  () => value,
-  (newVal) => {
-    if (typeof newVal === 'number') rating.value = newVal.toString()
-  },
-)
 </script>
 
 <style scoped>
