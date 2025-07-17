@@ -1,6 +1,6 @@
 import { addDoc, collection, doc, getDocs, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase'
-import type { Sight, SightPayload } from '@/types/sight.types'
+import type { Sight, SightPayload, Rating } from '@/types/sight.types'
 
 export const handleGetSights = async () => {
   const sights: Sight[] = []
@@ -15,7 +15,7 @@ export const handleGetSights = async () => {
       description: data.description,
       userId: data.userId,
       createdAt: data.createdAt,
-      rating: data.rating,
+      rating: Array.isArray(data.rating) ? data.rating : [], 
       latlng: data.latlng,
       img: data.img,
     })
@@ -50,6 +50,12 @@ export const handleUpdateSight = async (updatedData: Sight) => {
     latlng: updatedData.latlng,
     img: updatedData.img,
   })
+}
+
+export const handleUpdateSightProp = async (id: string, ratings: Rating[]) => {
+  const docRef = doc(db, 'sights', id)
+
+  await updateDoc(docRef, {rating: ratings})
 }
 
 export const handleGetSightById = async (id: string) => {

@@ -18,12 +18,7 @@
 import { ref } from 'vue'
 
 const rating = defineModel<string>({ default: '0' })
-const { maxStar } = defineProps<{ value?: number; maxStar?: number }>()
-
-const emit = defineEmits<{
-  (e: 'update:value', value: string): void
-}>()
-
+const { maxStar } = defineProps<{ maxStar?: number }>()
 const isHovered = ref<boolean>(false)
 const hoverValue = ref<number>(0)
 const max = ref<number>(maxStar ? maxStar : 5)
@@ -35,7 +30,6 @@ const hoverRating = (rate: number) => {
 
 const setRating = (rate: number) => {
   rating.value = rate.toString()
-  emit('update:value', rate.toString())
 }
 
 const resetHover = () => {

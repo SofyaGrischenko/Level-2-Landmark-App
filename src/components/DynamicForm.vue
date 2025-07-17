@@ -25,14 +25,10 @@
           :name="input.field"
           class="input"
         />
-
         <img-input v-else-if="input.type === 'file'" v-model="input.value" :name="input.field" />
-        <app-rating
-          v-else-if="input.type === 'rating'"
-          v-model="input.value"
-        />
       </template>
     </div>
+    <app-rating v-if="isSightPage" v-model="ratingVal" />
     <base-button @click.prevent="handleSubmit">submit</base-button>
   </form>
 </template>
@@ -45,7 +41,9 @@ import BaseInput from './UI/BaseInput.vue'
 import ImgInput from './UI/ImgInput.vue'
 import type { Input, Form } from '@/types/form.types'
 
-const { inputs } = defineProps<{
+const { inputs, isSightPage, initialRating } = defineProps<{
+  isSightPage: boolean
+  initialRating?: string
   inputs: Input[]
   title: string
 }>()
@@ -54,12 +52,13 @@ const emit = defineEmits<{ submit: [value: Form] }>()
 
 const slots = useSlots()
 
+const ratingVal = ref<string>(initialRating || '0') 
 const currentErrors = ref<string[]>([])
 
 const handleSubmit = () => {
   currentErrors.value = []
 
-  const formData = inputs.reduce((acc, input) => {
+  const form = inputs.reduce((acc, input) => {
     if (input?.validations?.length) {
       for (const { rule, errorMessage } of input.validations) {
         if (rule && !rule(input.value)) {
@@ -70,6 +69,8 @@ const handleSubmit = () => {
     acc[input.field] = input.value
     return acc
   }, {} as Form)
+
+  const formData = isSightPage ? { ...form, rating: ratingVal.value } : form
 
   if (!currentErrors.value.length) {
     emit('submit', formData)

@@ -14,3 +14,4 @@ export interface Input {
 export type Form = {
   [K in Input['field']]: string
 }
+
