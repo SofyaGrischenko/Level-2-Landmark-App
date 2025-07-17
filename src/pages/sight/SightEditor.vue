@@ -72,13 +72,19 @@ const setupForm = () => {
 }
 
 const handleSubmit = (formData: Form) => {
-  if (newCoords.value && currentUserUid.value) {
+  const updatedLat = newCoords.value?.lat || currentSight.value?.latlng.lat || 53
+  const updatedLng = newCoords.value?.lng || currentSight.value?.latlng.lng || 23
+
+  if (currentUserUid.value) {
     const payload = {
       title: formData.title,
       description: formData.description,
       rating: formData.rating,
-      latlng: { lat: newCoords.value.lat, lng: newCoords.value.lng },
       img: formData.img,
+      latlng: {
+        lat: updatedLat,
+        lng: updatedLng,
+      },
     }
 
     if (!currentSight.value?.id) {
