@@ -60,20 +60,26 @@ const setupForm = () => {
       placeholder: 'Your photo',
       field: 'img',
       value: currentSight.value?.img || '',
+      validations: [
+        {
+          rule: (val: string): boolean => required(val),
+          errorMessage: 'Photo is required',
+        },
+      ],
     },
 
     {
-      type: 'number',
+      type: 'rating',
       placeholder: 'Rating',
       field: 'rating',
-      value: currentSight.value?.rating || '',
+      value: currentSight.value?.rating || '0',
     },
   ]
 }
 
 const handleSubmit = (formData: Form) => {
-  const updatedLat = newCoords.value?.lat || currentSight.value?.latlng.lat || 53
-  const updatedLng = newCoords.value?.lng || currentSight.value?.latlng.lng || 23
+  const updatedLat = currentSight.value?.latlng.lat || newCoords.value?.lat || 53
+  const updatedLng = currentSight.value?.latlng.lng || newCoords.value?.lng || 23
 
   if (currentUserUid.value) {
     const payload = {

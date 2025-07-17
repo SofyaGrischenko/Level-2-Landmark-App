@@ -7,10 +7,10 @@
         <slot name="errors" />
       </p>
     </div>
-    <div class="form__inputs" >
+    <div class="form__inputs">
       <template v-for="(input, index) in inputs" :key="index">
         <base-input
-          v-if="input.type !== 'textarea' && input.type !== 'file'"
+          v-if="input.type !== 'textarea' && input.type !== 'file' && input.type !== 'rating'"
           v-model="input.value"
           :type="input.type"
           :placeholder="input.placeholder"
@@ -27,6 +27,10 @@
         />
 
         <img-input v-else-if="input.type === 'file'" v-model="input.value" :name="input.field" />
+        <app-rating
+          v-else-if="input.type === 'rating'"
+          v-model="input.value"
+        />
       </template>
     </div>
     <base-button @click.prevent="handleSubmit">submit</base-button>
@@ -35,6 +39,7 @@
 
 <script setup lang="ts">
 import { ref, useSlots, watch } from 'vue'
+import AppRating from './UI/AppRating.vue'
 import BaseButton from './UI/BaseButton.vue'
 import BaseInput from './UI/BaseInput.vue'
 import ImgInput from './UI/ImgInput.vue'

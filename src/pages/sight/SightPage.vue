@@ -13,7 +13,7 @@
       <p class="sight-description">
         {{ sight?.description }}
       </p>
-      <p class="sight-rating">⭐{{ sight?.rating }}</p>
+      <app-rating />
       <base-button v-if="sight?.userId === userStore.user?.uid" @click="handleEdit">
         Edit
       </base-button>
@@ -26,6 +26,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppMap from '@/components/UI/AppMap.vue'
 import AppHeader from '@/components/AppHeader.vue'
+import AppRating from '@/components/UI/AppRating.vue'
 import BaseButton from '@/components/UI/BaseButton.vue'
 import { useUserStore } from '@/stores/user'
 import type { Sight } from '@/types/sight.types'

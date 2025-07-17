@@ -1,0 +1,82 @@
+<template>
+  <div class="rating-container">
+    <span class="rating-label">rating:</span>
+    <div
+      v-for="i in max"
+      :key="i"
+      @click="setRating(i)"
+      @mouseHover="hoverRating(i)"
+      @mouseleave="resetHover"
+      :class="['star', i <= (isHovered ? hoverValue : Number(rating)) ? 'filled' : '']"
+    >
+      ★
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, watch } from 'vue'
+// import { handleGetSightRating, handleGetUserRating } from '@/services/api/rating';
+
+const rating = defineModel<string>({ default: '0' })
+const { value, maxStar } = defineProps<{ value?: number; maxStar?: number }>()
+
+const emit = defineEmits<{
+  (e: 'update:value', value: string): void
+}>()
+
+const isHovered = ref<boolean>(false)
+const hoverValue = ref<number>(0)
+const max = ref<number>(maxStar ? maxStar : 5)
+
+// const sightRating = await handleGetSightRating()
+// const userRating = await handleGetUserRating()
+
+const hoverRating = (rate: number) => {
+  isHovered.value = true
+  hoverValue.value = rate
+}
+
+const setRating = (rate: number) => {
+  rating.value = rate.toString()
+  emit('update:value', rate.toString())
+}
+
+const resetHover = () => {
+  isHovered.value = false
+  hoverValue.value = 0
+}
+
+watch(
+  () => value,
+  (newVal) => {
+    if (typeof newVal === 'number') rating.value = newVal.toString()
+  },
+)
+</script>
+
+<style scoped>
+.rating-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.star {
+  font-size: 3rem;
+  cursor: pointer;
+  margin: 2px;
+  color: #dedede;
+  cursor: pointer;
+  align-items: center;
+}
+
+.filled {
+  color: gold;
+}
+
+.rating-label {
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+</style>
