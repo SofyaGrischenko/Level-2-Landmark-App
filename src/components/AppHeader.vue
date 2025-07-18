@@ -10,6 +10,7 @@
         Go back
       </base-button>
     </div>
+    <base-button v-if="$route.name === 'home'" @click="openSideBar">Top sights</base-button>
     <base-button @click="logout">Log Out</base-button>
   </div>
 </template>
@@ -20,6 +21,8 @@ import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
 const userStore = useUserStore()
+
+const { openSideBar } = defineProps<{ openSideBar?: () => void }>()
 
 const logout = () => {
   userStore.storeLogout()

@@ -1,5 +1,6 @@
 import { addDoc, collection, doc, getDocs, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase'
+import { compareNum } from '@/utils/rating'
 import type { Sight, SightPayload, Rating } from '@/types/sight.types'
 
 export const handleGetSights = async () => {
@@ -15,13 +16,13 @@ export const handleGetSights = async () => {
       description: data.description,
       userId: data.userId,
       createdAt: data.createdAt,
-      rating: Array.isArray(data.rating) ? data.rating : [], 
+      rating: Array.isArray(data.rating) ? data.rating : [],
       latlng: data.latlng,
       img: data.img,
     })
   })
 
-  return sights
+  return sights.sort(compareNum)
 }
 
 export const handleCreateSight = async (sight: SightPayload) => {
@@ -55,7 +56,7 @@ export const handleUpdateSight = async (updatedData: Sight) => {
 export const handleUpdateSightProp = async (id: string, ratings: Rating[]) => {
   const docRef = doc(db, 'sights', id)
 
-  await updateDoc(docRef, {rating: ratings})
+  await updateDoc(docRef, { rating: ratings })
 }
 
 export const handleGetSightById = async (id: string) => {
