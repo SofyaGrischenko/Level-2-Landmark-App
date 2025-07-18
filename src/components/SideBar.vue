@@ -33,7 +33,7 @@ defineEmits<{ (e: 'close-sidebar'): void }>()
 
 const sights = ref<Sight[]>([])
 const visibleSights = ref<Sight[]>([])
-const pageSize = 11
+const pageSize = 15
 const currentPage = ref(1)
 
 const handleSightClick = (sight: Sight) => {
